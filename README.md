@@ -18,10 +18,20 @@ the new [swift-protobuf][5] library.
     $ make
     $ cd server && go run main.go
 
+## Run iOS client
+
+    $ open clients/ios/Pages/Pages.xcodeproj
+    Product > Run (⌘R)
+
 ## Run web client
 
     $ cd clients/web
     $ elm-reactor
+
+## Run command line client
+
+    $ cd clients/cmd
+    $ go run main.go
 
 [1]:http://www.grpc.io
 [2]:https://developers.google.com/protocol-buffers/
