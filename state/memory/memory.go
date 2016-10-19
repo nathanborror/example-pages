@@ -155,7 +155,7 @@ func (s *memory) PageDelete(id, account string) error {
 // Helpers
 
 func uniqueID() string {
-	return utils.RandomHash()
+	return utils.RandSha1()
 }
 
 func now() int64 {

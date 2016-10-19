@@ -40,7 +40,7 @@ type server struct {
 
 func (s *server) Register(ctx context.Context, in *pages.RegisterRequest) (*pages.Session, error) {
 	password := utils.PasswordMake(in.Password)
-	token := utils.RandomHash()
+	token := utils.RandSha1()
 
 	account, err := s.state.AccountCreate(in.Name, in.Email, password)
 	if err != nil {
@@ -55,7 +55,7 @@ func (s *server) Register(ctx context.Context, in *pages.RegisterRequest) (*page
 }
 
 func (s *server) Connect(ctx context.Context, in *pages.ConnectRequest) (*pages.Session, error) {
-	token := utils.RandomHash()
+	token := utils.RandSha1()
 
 	account, err := s.state.AccountForEmail(in.Identifier)
 	if err != nil {

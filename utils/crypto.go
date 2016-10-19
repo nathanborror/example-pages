@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"crypto/hmac"
 	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -15,16 +15,16 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-// RandomHash returns a SHA1 hash based on the current UNIX timestamp
+// RandSha1 returns a SHA1 hash based on the current UNIX timestamp
 // and a random number between 0 and 1000 in an attempt to be random.
-func RandomHash() string {
+func RandSha1() string {
 	salt := RandString(12)
 	time := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
-	return Hash(time + salt)
+	return Sha1(time + salt)
 }
 
-// Hash returns a SHA1 hash based on the given value.
-func Hash(values ...string) string {
+// Sha1 returns a SHA1 hash based on the given value.
+func Sha1(values ...string) string {
 	hasher := sha1.New()
 	str := strings.Join(values, "")
 	io.WriteString(hasher, str)
@@ -41,16 +41,7 @@ func RandString(length int) string {
 	return string(b)
 }
 
-// Sha256Hash returns an Sha256 HMAC
-func Sha256Hash(secret string, message string) string {
-	key := []byte(secret)
-	h := hmac.New(sha256.New, key)
-	h.Write([]byte(message))
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
-// PasswordMake returns an encrypted password string using `pbkdf2_sha256`
-// algorithm.
+// PasswordMake returns an encrypted password string using pbkdf2_sha256
 func PasswordMake(password string) string {
 	algorithm := "pbkdf2_sha256"
 	iterations := 12000
@@ -70,8 +61,12 @@ func PasswordEncode(algorithm string, iterations int, salt string, password stri
 // existing encrypted password.
 func IsPasswordValid(password string, attempt string) bool {
 	parts := strings.Split(password, "$")
+	if len(parts) < 3 {
+		return false
+	}
 	algorithm := parts[0]
 	iterations, _ := strconv.Atoi(parts[1])
 	salt := parts[2]
-	return password == PasswordEncode(algorithm, iterations, salt, attempt)
+	encodedAttempt := PasswordEncode(algorithm, iterations, salt, attempt)
+	return subtle.ConstantTimeCompare([]byte(password), []byte(encodedAttempt)) == 1
 }
