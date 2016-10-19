@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+message Empty {}
+
+// Accounts
+
+service Accounts {
+  rpc Register(RegisterRequest) returns (Session) {
+    option (google.api.http) = {
+      post: "/accounts.register"
+      body: "*"
+    };
+  }
+
+  rpc Connect(ConnectRequest) returns (Session) {
+    option (google.api.http) = {
+      post: "/accounts.connect"
+      body: "*"
+    };
+  }
+}
+
+message Account {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  int64 created = 5;
+  int64 modified = 6;
+
+}
+
+message Session {
+  Account account = 1;
+  string token = 2;
+}
+
+message RegisterRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message ConnectRequest {
+  string identifier = 1;
+  string password = 2;
+}
+
+// Pages
+
+service Pages {
+  rpc PageCreate(PageCreateRequest) returns (Page) {
+    option (google.api.http) = {
+      post: "/page.create"
+      body: "*"
+    };
+  }
+
+  rpc PageUpdate(PageUpdateRequest) returns (Page) {
+    option (google.api.http) = {
+      post: "/page.update"
+      body: "*"
+    };
+  }
+
+  rpc PageDelete(PageDeleteRequest) returns (Empty) {
+    option (google.api.http) = {
+      post: "/page.delete"
+      body: "*"
+    };
+  }
+
+  rpc PageGet(PageGetRequest) returns (Page) {
+    option (google.api.http) = {
+      get: "/page.get"
+    };
+  }
+
+  rpc PageList(Empty) returns (PagesSet) {
+    option (google.api.http) = {
+      get: "/pages"
+    };
+  }
+}
+
+message PageGetRequest {
+  string id = 1;
+}
+
+message PageCreateRequest {
+  string text = 1;
+}
+
+message PageUpdateRequest {
+  string id = 1;
+  string text = 2;
+}
+
+message PageDeleteRequest {
+  string id = 1;
+}
+
+message Page {
+  string id = 1;
+  Account account = 2;
+  string text = 3;
+  int64 created = 4;
+  int64 modified = 5;
+}
+
+message PagesSet {
+  repeated Page pages = 1;
+  int64 total = 2;
+  int64 page = 3;
+}

@@ -1,0 +1,44 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "A6DC596DAF685592E3F47DE1B314AC44C3C07386",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "43BF8F9148B1F39FBDE34E7D1E69C54C78D21FCC" : 9223372036854775807,
+    "A6DC596DAF685592E3F47DE1B314AC44C3C07386" : 9223372036854775807,
+    "912B3313D0FF95271A64C01C66C9F6D07ABCC3C2" : 9223372036854775807,
+    "7072082D5461A319A8FC24FCEBDD3C2A369AEEEB" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "5FFBFDE0-462B-459F-983E-B03C136A5F3C",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "43BF8F9148B1F39FBDE34E7D1E69C54C78D21FCC" : "stack\/services\/pages\/clients\/ios\/PageKit\/Packages\/SwiftProtobuf-0.9.24\/",
+    "A6DC596DAF685592E3F47DE1B314AC44C3C07386" : "stack\/",
+    "912B3313D0FF95271A64C01C66C9F6D07ABCC3C2" : "stack\/services\/pages\/clients\/ios\/PageKit\/Packages\/SwiftGRPC-0.1.5\/",
+    "7072082D5461A319A8FC24FCEBDD3C2A369AEEEB" : "stack\/services\/pages\/clients\/ios\/PageKit\/Packages\/SwiftHttp2-0.1.0\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "PageKit",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "services\/pages\/clients\/ios\/PageKit\/PageKit.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/apple\/swift-protobuf.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "43BF8F9148B1F39FBDE34E7D1E69C54C78D21FCC"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/nathanborror\/swift-http2.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "7072082D5461A319A8FC24FCEBDD3C2A369AEEEB"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/nathanborror\/swift-grpc.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "912B3313D0FF95271A64C01C66C9F6D07ABCC3C2"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:nathanborror\/stack.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "A6DC596DAF685592E3F47DE1B314AC44C3C07386"
+    }
+  ]
+}
