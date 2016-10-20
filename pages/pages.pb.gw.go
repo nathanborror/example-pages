@@ -208,9 +208,9 @@ func RegisterAccountsHandler(ctx context.Context, mux *runtime.ServeMux, conn *g
 }
 
 var (
-	pattern_Accounts_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"accounts.register"}, ""))
+	pattern_Accounts_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"account.register"}, ""))
 
-	pattern_Accounts_Connect_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"accounts.connect"}, ""))
+	pattern_Accounts_Connect_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"account.connect"}, ""))
 )
 
 var (

@@ -9,14 +9,14 @@ message Empty {}
 service Accounts {
   rpc Register(RegisterRequest) returns (Session) {
     option (google.api.http) = {
-      post: "/accounts.register"
+      post: "/account.register"
       body: "*"
     };
   }
 
   rpc Connect(ConnectRequest) returns (Session) {
     option (google.api.http) = {
-      post: "/accounts.connect"
+      post: "/account.connect"
       body: "*"
     };
   }
