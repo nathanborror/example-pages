@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"flag"
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -10,6 +12,7 @@ import (
 	"golang.org/x/net/trace"
 
 	"github.com/nathanborror/pages/pages"
+	"github.com/nathanborror/pages/server/proxy"
 	"github.com/nathanborror/pages/state"
 	"github.com/nathanborror/pages/state/memory"
 	"github.com/nathanborror/pages/utils"
@@ -20,6 +23,13 @@ import (
 )
 
 const ctxAccountAuthorizationID = "AccountAuthorizationID"
+
+var (
+	host        = flag.String("host", "localhost", "Listening hostname")
+	port        = flag.String("port", "8080", "Listening port")
+	gatewayPort = flag.String("gateway-port", "8081", "Listening RESTful reverse-proxy port")
+	debugPort   = flag.String("debug-port", "8082", "Listening trace debugger port")
+)
 
 var (
 	// ErrAccessDenied means the request was missing token meta-data.
@@ -170,6 +180,7 @@ func (s *server) authorizedAccount(ctx context.Context) (account *pages.Account)
 // Main
 
 func main() {
+	flag.Parse()
 
 	s := server{}
 
@@ -193,17 +204,20 @@ func main() {
 	pages.RegisterPagesServer(gs, &s)
 
 	// Listen over TCP
-	lis, err := net.Listen("tcp", ":8080")
+	lis, err := net.Listen("tcp", ":"+*port)
 	if err != nil {
 		panic(err)
 	}
 
-	// Debug: Tracer
-	trace.DebugUseAfterFinish = true
-	go func() {
-		http.ListenAndServe(":8082", nil)
-	}()
+	// Serve gRPC
+	go gs.Serve(lis)
 
-	// Serve
-	gs.Serve(lis)
+	// Serve debugger
+	trace.DebugUseAfterFinish = true
+	go http.ListenAndServe(":"+*debugPort, nil)
+
+	// Serve gRPC gateway
+	if err := proxy.Serve(fmt.Sprintf("%s:%s", *host, *port), *gatewayPort); err != nil {
+		panic(err)
+	}
 }
