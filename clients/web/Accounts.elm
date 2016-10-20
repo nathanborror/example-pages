@@ -25,7 +25,7 @@ type alias Account =
 
 initAccount : Account
 initAccount =
-    (Account "" "" "" "" "" "")
+    (Account "" "" "" "" "")
 
 
 type alias Session =
@@ -52,7 +52,7 @@ type alias Model =
 
 init : Model
 init =
-    (Model "" "" "" "" "" False initSession "")
+    (Model "" "" "" "" False initSession "")
 
 
 
@@ -114,7 +114,7 @@ connect : Model -> Cmd Msg
 connect model =
     let
         url =
-            "http://localhost:8080/api/account.connect"
+            "http://localhost:8081/account.connect"
 
         json =
             [ ( "identifier", Json.Encode.string model.identifier )
@@ -146,7 +146,7 @@ register : Model -> Cmd Msg
 register model =
     let
         url =
-            "http://localhost:8080/api/account.register"
+            "http://localhost:8081/account.register"
 
         json =
             [ ( "name", Json.Encode.string model.name )
