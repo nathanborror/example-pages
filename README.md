@@ -25,8 +25,8 @@ the new [swift-protobuf][5] library.
 
 ## Run web client
 
-    $ cd clients/web
-    $ elm-reactor
+    $ make web
+    $ open clients/web/index.html
 
 ## Run command line client
 

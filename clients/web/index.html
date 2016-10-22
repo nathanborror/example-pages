@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pages</title>
+  <script type="text/javascript" src="elm.js"></script>
+</head>
+<body></body>
+
+<script type="text/javascript">
+  var storedState = localStorage.getItem('elm-pages-save');
+  var startingState = storedState ? JSON.parse(storedState) : null;
+  var pages = Elm.Main.fullscreen(startingState)
+  pages.ports.setStorage.subscribe(function(state) {
+    localStorage.setItem('elm-pages-save', JSON.stringify(state));
+  });
+</script>
+</html>

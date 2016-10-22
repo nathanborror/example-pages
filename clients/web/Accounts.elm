@@ -9,6 +9,7 @@ import Json.Decode exposing (Decoder, string, list)
 import Json.Decode.Pipeline exposing (decode, required)
 import Http
 import Task
+import Utils exposing (rpc, errorMapper)
 
 
 -- MODEL
@@ -113,29 +114,13 @@ update msg model =
 connect : Model -> Cmd Msg
 connect model =
     let
-        url =
-            "http://localhost:8081/account.connect"
-
         json =
             [ ( "identifier", Json.Encode.string model.identifier )
             , ( "password", Json.Encode.string model.password )
             ]
 
-        body =
-            json
-                |> Json.Encode.object
-                |> Json.Encode.encode 0
-                |> Http.string
-
-        request =
-            { verb = "POST"
-            , headers = [ ( "Content-Type", "application/json" ) ]
-            , url = url
-            , body = body
-            }
-
         task =
-            Http.send Http.defaultSettings request
+            rpc "account.connect" "" json
                 |> Http.fromJson decodeSession
     in
         task
@@ -145,30 +130,14 @@ connect model =
 register : Model -> Cmd Msg
 register model =
     let
-        url =
-            "http://localhost:8081/account.register"
-
         json =
             [ ( "name", Json.Encode.string model.name )
             , ( "email", Json.Encode.string model.email )
             , ( "password", Json.Encode.string model.password )
             ]
 
-        body =
-            json
-                |> Json.Encode.object
-                |> Json.Encode.encode 0
-                |> Http.string
-
-        request =
-            { verb = "POST"
-            , headers = [ ( "Content-Type", "application/json" ) ]
-            , url = url
-            , body = body
-            }
-
         task =
-            Http.send Http.defaultSettings request
+            rpc "account.register" "" json
                 |> Http.fromJson decodeSession
     in
         task
@@ -217,7 +186,7 @@ connectForm model =
         , input [ placeholder "Name or Email", onInput ChangeIdentifier, style inputStyle ] []
         , input [ placeholder "Password", onInput ChangePassword, type' "password", style inputStyle ] []
         , button [ onClick Connect ] [ text "Connect" ]
-        , div [] [ a [ onClick (Registering True), href "#" ] [ text "Sign Up" ] ]
+        , span [] [ a [ onClick (Registering True), href "#" ] [ text "Sign Up" ] ]
         ]
 
 
@@ -229,7 +198,7 @@ registerForm model =
         , input [ placeholder "Email", onInput ChangeEmail, style inputStyle ] []
         , input [ placeholder "Password", onInput ChangePassword, type' "password", style inputStyle ] []
         , button [ onClick Register ] [ text "Register" ]
-        , div [] [ a [ onClick (Registering False), href "#" ] [ text "Log In" ] ]
+        , span [] [ a [ onClick (Registering False), href "#" ] [ text "Log In" ] ]
         ]
 
 
@@ -240,6 +209,10 @@ authenticated session =
         ]
 
 
+
+-- STYLES
+
+
 inputStyle : List ( String, String )
 inputStyle =
     [ ( "display", "block" ) ]
@@ -248,16 +221,3 @@ inputStyle =
 errorStyle : List ( String, String )
 errorStyle =
     [ ( "color", "red" ) ]
-
-
-errorMapper : Http.Error -> String
-errorMapper err =
-    case err of
-        Http.UnexpectedPayload exp ->
-            exp
-
-        Http.BadResponse code exp ->
-            exp
-
-        otherwise ->
-            ""

@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Html exposing (..)
 import Html.App as App
@@ -11,13 +11,26 @@ import Accounts
 import Pages
 
 
+main : Program (Maybe Model)
 main =
-    App.program
+    App.programWithFlags
         { init = init
         , view = view
-        , update = update
-        , subscriptions = subscriptions
+        , update = updateWithStorage
+        , subscriptions = \_ -> Sub.none
         }
+
+
+port setStorage : Model -> Cmd msg
+
+
+updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
+updateWithStorage msg model =
+    let
+        ( newModel, cmds ) =
+            update msg model
+    in
+        ( newModel, Cmd.batch [ setStorage newModel, cmds ] )
 
 
 
@@ -30,9 +43,14 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( Model Accounts.init Pages.init, Cmd.none )
+initModel : Model
+initModel =
+    (Model Accounts.init Pages.init)
+
+
+init : Maybe Model -> ( Model, Cmd Msg )
+init savedModel =
+    ( Maybe.withDefault initModel savedModel, Cmd.map PagesMsg Pages.listPages )
 
 
 
@@ -51,8 +69,11 @@ update msg model =
             let
                 ( updated, cmd ) =
                     Accounts.update subMsg model.accounts
+
+                pages =
+                    model.pages
             in
-                ( { model | accounts = updated }, Cmd.map AccountsMsg cmd )
+                ( { model | accounts = updated, pages = { pages | session = updated.session } }, Cmd.map AccountsMsg cmd )
 
         PagesMsg subMsg ->
             let
@@ -72,12 +93,3 @@ view model =
         [ App.map AccountsMsg (Accounts.view model.accounts)
         , App.map PagesMsg (Pages.view model.pages)
         ]
-
-
-
---  SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
