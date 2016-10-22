@@ -6,16 +6,23 @@ command line client. The web client is written in [Elm][3] which uses the [gRPC
 Gateway][4] interface. And finally the native client is written in Swift using
 the new [swift-protobuf][5] library.
 
----
+## Todos
 
-:warning: This is incomplete. The Swift client and server should build.
+[x] Protobuf Server
+[x] JSON reverse-proxy
+[] In-memory state
+[] Persistent state
+[x] iOS client
+[x] Web client
+[] Command-line client
 
----
-
-## Run server
+## Installation
 
     $ ./setup.sh
     $ make
+
+### Run server & reverse-proxy
+
     $ cd server && go run main.go
 
 ## Run iOS client
@@ -25,7 +32,6 @@ the new [swift-protobuf][5] library.
 
 ## Run web client
 
-    $ make web
     $ open clients/web/index.html
 
 ## Run command line client
