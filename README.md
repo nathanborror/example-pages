@@ -8,13 +8,13 @@ the new [swift-protobuf][5] library.
 
 ## Todos
 
-[x] Protobuf Server
-[x] JSON reverse-proxy
-[] In-memory state
-[] Persistent state
-[x] iOS client
-[x] Web client
-[] Command-line client
+- [x] Protobuf Server
+- [x] JSON reverse-proxy
+- [ ] In-memory state
+- [ ] Persistent state
+- [x] iOS client
+- [x] Web client
+- [ ] Command-line client
 
 ## Installation
 
@@ -25,16 +25,16 @@ the new [swift-protobuf][5] library.
 
     $ cd server && go run main.go
 
-## Run iOS client
+### Run iOS client
 
     $ open clients/ios/Pages/Pages.xcodeproj
     Product > Run (⌘R)
 
-## Run web client
+### Run web client
 
     $ open clients/web/index.html
 
-## Run command line client
+### Run command line client
 
     $ cd clients/cmd
     $ go run main.go
