@@ -62,29 +62,6 @@ public struct Account: ProtobufGeneratedMessage {
 
   public init() {}
 
-  public init(id: String? = nil,
-    name: String? = nil,
-    email: String? = nil,
-    created: Int64? = nil,
-    modified: Int64? = nil)
-  {
-    if let v = id {
-      self.id = v
-    }
-    if let v = name {
-      self.name = v
-    }
-    if let v = email {
-      self.email = v
-    }
-    if let v = created {
-      self.created = v
-    }
-    if let v = modified {
-      self.modified = v
-    }
-  }
-
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
     switch protoFieldNumber {
@@ -187,6 +164,12 @@ public struct Session: ProtobufGeneratedMessage {
     get {return _storage._account ?? Account()}
     set {_uniqueStorage()._account = newValue}
   }
+  public var hasAccount: Bool {
+    return _storage._account != nil
+  }
+  public mutating func clearAccount() {
+    return _storage._account = nil
+  }
 
   public var token: String {
     get {return _storage._token}
@@ -194,16 +177,6 @@ public struct Session: ProtobufGeneratedMessage {
   }
 
   public init() {}
-
-  public init(account: Account? = nil,
-    token: String? = nil)
-  {
-    let storage = _uniqueStorage()
-    storage._account = account
-    if let v = token {
-      storage._token = v
-    }
-  }
 
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     return try _uniqueStorage().decodeField(setter: &setter, protoFieldNumber: protoFieldNumber)
@@ -247,21 +220,6 @@ public struct RegisterRequest: ProtobufGeneratedMessage {
   public var password: String = ""
 
   public init() {}
-
-  public init(name: String? = nil,
-    email: String? = nil,
-    password: String? = nil)
-  {
-    if let v = name {
-      self.name = v
-    }
-    if let v = email {
-      self.email = v
-    }
-    if let v = password {
-      self.password = v
-    }
-  }
 
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
@@ -314,17 +272,6 @@ public struct ConnectRequest: ProtobufGeneratedMessage {
 
   public init() {}
 
-  public init(identifier: String? = nil,
-    password: String? = nil)
-  {
-    if let v = identifier {
-      self.identifier = v
-    }
-    if let v = password {
-      self.password = v
-    }
-  }
-
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
     switch protoFieldNumber {
@@ -367,13 +314,6 @@ public struct PageGetRequest: ProtobufGeneratedMessage {
 
   public init() {}
 
-  public init(id: String? = nil)
-  {
-    if let v = id {
-      self.id = v
-    }
-  }
-
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
     switch protoFieldNumber {
@@ -410,13 +350,6 @@ public struct PageCreateRequest: ProtobufGeneratedMessage {
   public var text: String = ""
 
   public init() {}
-
-  public init(text: String? = nil)
-  {
-    if let v = text {
-      self.text = v
-    }
-  }
 
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
@@ -459,17 +392,6 @@ public struct PageUpdateRequest: ProtobufGeneratedMessage {
 
   public init() {}
 
-  public init(id: String? = nil,
-    text: String? = nil)
-  {
-    if let v = id {
-      self.id = v
-    }
-    if let v = text {
-      self.text = v
-    }
-  }
-
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
     switch protoFieldNumber {
@@ -511,13 +433,6 @@ public struct PageDeleteRequest: ProtobufGeneratedMessage {
   public var id: String = ""
 
   public init() {}
-
-  public init(id: String? = nil)
-  {
-    if let v = id {
-      self.id = v
-    }
-  }
 
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
@@ -633,6 +548,12 @@ public struct Page: ProtobufGeneratedMessage {
     get {return _storage._account ?? Account()}
     set {_uniqueStorage()._account = newValue}
   }
+  public var hasAccount: Bool {
+    return _storage._account != nil
+  }
+  public mutating func clearAccount() {
+    return _storage._account = nil
+  }
 
   public var text: String {
     get {return _storage._text}
@@ -650,28 +571,6 @@ public struct Page: ProtobufGeneratedMessage {
   }
 
   public init() {}
-
-  public init(id: String? = nil,
-    account: Account? = nil,
-    text: String? = nil,
-    created: Int64? = nil,
-    modified: Int64? = nil)
-  {
-    let storage = _uniqueStorage()
-    if let v = id {
-      storage._id = v
-    }
-    storage._account = account
-    if let v = text {
-      storage._text = v
-    }
-    if let v = created {
-      storage._created = v
-    }
-    if let v = modified {
-      storage._modified = v
-    }
-  }
 
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     return try _uniqueStorage().decodeField(setter: &setter, protoFieldNumber: protoFieldNumber)
@@ -715,21 +614,6 @@ public struct PagesSet: ProtobufGeneratedMessage {
   public var page: Int64 = 0
 
   public init() {}
-
-  public init(pages: [Page] = [],
-    total: Int64? = nil,
-    page: Int64? = nil)
-  {
-    if !pages.isEmpty {
-      self.pages = pages
-    }
-    if let v = total {
-      self.total = v
-    }
-    if let v = page {
-      self.page = v
-    }
-  }
 
   public mutating func _protoc_generated_decodeField(setter: inout ProtobufFieldDecoder, protoFieldNumber: Int) throws -> Bool {
     let handled: Bool
