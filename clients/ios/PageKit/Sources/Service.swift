@@ -11,7 +11,7 @@ import SwiftGRPC
 import SwiftProtobuf
 
 public class Service {
-    
+
     public typealias SessionHandler = (() throws -> Session) -> Void
     public typealias PagesHandler   = (() throws -> PagesSet) -> Void
     public typealias PageHandler    = (() throws -> Page) -> Void
@@ -45,44 +45,44 @@ public class Service {
     }
 
     let session: GrpcSession
-    
+
     public init(endpoint: String) {
         guard let endpointUrl = URL(string: endpoint) else {
             fatalError("Service Error: Unable to initialize URL for endpoint: \(endpoint)")
         }
         self.session = GrpcSession(url: endpointUrl)
     }
-    
+
     public func register(name: String, email: String, password: String, then: @escaping SessionHandler) {
         let data = RegisterRequest(name: name, email: email, password: password)
         call(route: .account(.register), data: data, token: nil, then: then)
     }
-    
+
     public func connect(identifier: String, password: String, then: @escaping SessionHandler) {
         let data = ConnectRequest(identifier: identifier, password: password)
         call(route: .account(.connect), data: data, token: nil, then: then)
     }
-    
+
     public func pageCreate(text: String, token: String?, then: @escaping PageHandler) {
         let data = PageCreateRequest(text: text)
         call(route: .page(.create), data: data, token: token, then: then)
     }
-    
+
     public func pageUpdate(id: String, text: String, token: String?, then: @escaping PageHandler) {
         let data = PageUpdateRequest(id: id, text: text)
         call(route: .page(.update), data: data, token: token, then: then)
     }
-    
-    public func pageDelete(id: String, token: String?, then: @escaping EmptyHandler) {
+
+    public func pageDelete(id: String, token: String?, then: @escaping PageHandler) {
         let data = PageDeleteRequest(id: id)
         call(route: .page(.delete), data: data, token: token, then: then)
     }
-    
+
     public func pageGet(id: String, then: @escaping PageHandler) {
         let data = PageGetRequest(id: id)
         call(route: .page(.get), data: data, token: nil, then: then)
     }
-    
+
     public func pageList(then: @escaping PagesHandler) {
         let data = Empty()
         call(route: .page(.list), data: data, token: nil, then: then)

@@ -94,12 +94,16 @@ func (s *server) PageUpdate(ctx context.Context, in *pages.PageUpdateRequest) (*
 	return s.state.PageUpdate(in.Id, accountID, in.Text)
 }
 
-func (s *server) PageDelete(ctx context.Context, in *pages.PageDeleteRequest) (*pages.Empty, error) {
+func (s *server) PageDelete(ctx context.Context, in *pages.PageDeleteRequest) (*pages.Page, error) {
 	accountID := s.authorizedAccountID(ctx)
+	page, err := s.state.Page(in.Id)
+	if err != nil {
+		return nil, err
+	}
 	if err := s.state.PageDelete(in.Id, accountID); err != nil {
 		return nil, err
 	}
-	return &pages.Empty{}, nil
+	return page, nil
 }
 
 func (s *server) PageGet(ctx context.Context, in *pages.PageGetRequest) (*pages.Page, error) {

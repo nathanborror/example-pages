@@ -64,7 +64,7 @@ service Pages {
     };
   }
 
-  rpc PageDelete(PageDeleteRequest) returns (Empty) {
+  rpc PageDelete(PageDeleteRequest) returns (Page) {
     option (google.api.http) = {
       post: "/page.delete"
       body: "*"
