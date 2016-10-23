@@ -13,9 +13,9 @@
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "E4246AA7-A065-4E69-A0C5-16C985CD19F9",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "43BF8F9148B1F39FBDE34E7D1E69C54C78D21FCC" : "pages\/clients\/ios\/PageKit\/Packages\/SwiftProtobuf-0.9.24\/",
-    "7072082D5461A319A8FC24FCEBDD3C2A369AEEEB" : "pages\/clients\/ios\/PageKit\/Packages\/SwiftHttp2-0.1.2\/",
+    "7072082D5461A319A8FC24FCEBDD3C2A369AEEEB" : "pages\/clients\/ios\/PageKit\/Packages\/SwiftHttp2-0.1.3\/",
     "912B3313D0FF95271A64C01C66C9F6D07ABCC3C2" : "pages\/clients\/ios\/PageKit\/Packages\/SwiftGRPC-0.1.9\/",
-    "DB6172925B13538317BBF580071A68637DDA2EC6" : "pages\/clients\/ios\/PageKit\/Packages\/SwiftHpack-0.1.1\/",
+    "DB6172925B13538317BBF580071A68637DDA2EC6" : "pages\/clients\/ios\/PageKit\/Packages\/SwiftHpack-0.1.2\/",
     "B9553C1EFE741E4D2A6F2E9DC61BE7239CF6E2C2" : "pages\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "Pages",
