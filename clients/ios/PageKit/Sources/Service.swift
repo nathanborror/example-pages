@@ -54,32 +54,48 @@ public class Service {
     }
 
     public func register(name: String, email: String, password: String, then: @escaping SessionHandler) {
-        let data = RegisterRequest(name: name, email: email, password: password)
+        let data = RegisterRequest.with {
+            $0.name = name
+            $0.email = email
+            $0.password = password
+        }
         call(route: .account(.register), data: data, token: nil, then: then)
     }
 
     public func connect(identifier: String, password: String, then: @escaping SessionHandler) {
-        let data = ConnectRequest(identifier: identifier, password: password)
+        let data = ConnectRequest.with {
+            $0.identifier = identifier
+            $0.password = password
+        }
         call(route: .account(.connect), data: data, token: nil, then: then)
     }
 
     public func pageCreate(text: String, token: String?, then: @escaping PageHandler) {
-        let data = PageCreateRequest(text: text)
+        let data = PageCreateRequest.with {
+            $0.text = text
+        }
         call(route: .page(.create), data: data, token: token, then: then)
     }
 
     public func pageUpdate(id: String, text: String, token: String?, then: @escaping PageHandler) {
-        let data = PageUpdateRequest(id: id, text: text)
+        let data = PageUpdateRequest.with {
+            $0.id = id
+            $0.text = text
+        }
         call(route: .page(.update), data: data, token: token, then: then)
     }
 
     public func pageDelete(id: String, token: String?, then: @escaping PageHandler) {
-        let data = PageDeleteRequest(id: id)
+        let data = PageDeleteRequest.with {
+            $0.id = id
+        }
         call(route: .page(.delete), data: data, token: token, then: then)
     }
 
     public func pageGet(id: String, then: @escaping PageHandler) {
-        let data = PageGetRequest(id: id)
+        let data = PageGetRequest.with {
+            $0.id = id
+        }
         call(route: .page(.get), data: data, token: nil, then: then)
     }
 
@@ -90,8 +106,9 @@ public class Service {
 
     private func call<Request: ProtobufMessage, Response: ProtobufMessage>(route: Service.Route, data: Request, token: String?, then: @escaping (() throws -> Response) -> Void) {
         do {
-            try session.write(path: String(describing: route), data: data, token: token) { bytes in
-                then { return try Response(protobufBytes: bytes) }
+            try session.write(path: String(describing: route), message: data, token: token) { bytes in
+                let data = Data(bytes)
+                then { return try Response(protobuf: data) }
             }
         } catch {
             then { throw error }
