@@ -2,14 +2,14 @@ module Accounts exposing (..)
 
 import Html exposing (..)
 import Html.App as App
-import Html.Attributes exposing (style, placeholder, type', href)
+import Html.Attributes exposing (style, placeholder, type', href, value)
 import Html.Events exposing (..)
 import Json.Encode
 import Json.Decode exposing (Decoder, string, list)
 import Json.Decode.Pipeline exposing (decode, required)
 import Http
 import Task
-import Utils exposing (rpc, errorMapper)
+import Utils exposing (..)
 
 
 -- MODEL
@@ -41,8 +41,7 @@ initSession =
 
 
 type alias Model =
-    { identifier : String
-    , name : String
+    { name : String
     , email : String
     , password : String
     , isRegistering : Bool
@@ -53,7 +52,7 @@ type alias Model =
 
 init : Model
 init =
-    (Model "" "" "" "" False initSession "")
+    (Model "" "" "" False initSession "")
 
 
 
@@ -61,22 +60,27 @@ init =
 
 
 type Msg
-    = Connect
+    = NoOp
+    | Connect
     | ConnectSucceed Session
     | ConnectFail Http.Error
     | Register
     | RegisterSucceed Session
     | RegisterFail Http.Error
     | Registering Bool
-    | ChangeIdentifier String
+    | Disconnect
     | ChangeName String
     | ChangeEmail String
     | ChangePassword String
+    | ClearError
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         Connect ->
             ( model, connect model )
 
@@ -98,8 +102,8 @@ update msg model =
         Registering bool ->
             ( { model | isRegistering = bool, error = "" }, Cmd.none )
 
-        ChangeIdentifier identifier ->
-            ( { model | identifier = identifier }, Cmd.none )
+        Disconnect ->
+            ( init, Cmd.none )
 
         ChangeName name ->
             ( { model | name = name }, Cmd.none )
@@ -110,12 +114,15 @@ update msg model =
         ChangePassword password ->
             ( { model | password = password }, Cmd.none )
 
+        ClearError ->
+            ( { model | error = "" }, Cmd.none )
+
 
 connect : Model -> Cmd Msg
 connect model =
     let
         json =
-            [ ( "identifier", Json.Encode.string model.identifier )
+            [ ( "identifier", Json.Encode.string model.email )
             , ( "password", Json.Encode.string model.password )
             ]
 
@@ -167,46 +174,75 @@ decodeSession =
 
 view : Model -> Html Msg
 view model =
+    div [] [ viewError model.error, viewForm model ]
+
+
+viewForm : Model -> Html Msg
+viewForm model =
+    if model.session.token /= "" then
+        viewSession model.session
+    else if model.isRegistering then
+        viewRegisterForm model
+    else
+        viewConnectForm model
+
+
+viewConnectForm : Model -> Html Msg
+viewConnectForm model =
+    div []
+        [ form []
+            [ input [ placeholder "Email", onInput ChangeEmail, style inputStyle, value model.email ] []
+            , input [ placeholder "Password", onInput ChangePassword, type' "password", style inputStyle, value model.password, onEnter Connect ] []
+            ]
+        , p [] [ a [ onClick (Registering True), href "#" ] [ text "Create an account?" ] ]
+        ]
+
+
+viewRegisterForm : Model -> Html Msg
+viewRegisterForm model =
+    div []
+        [ form []
+            [ input [ placeholder "Name", onInput ChangeName, style inputStyle, value model.name ] []
+            , input [ placeholder "Email", onInput ChangeEmail, style inputStyle, value model.email ] []
+            , input [ placeholder "Password", onInput ChangePassword, type' "password", style inputStyle, value model.password, onEnter Register ] []
+            ]
+        , p [] [ a [ onClick (Registering False), href "#" ] [ text "Already have an account?" ] ]
+        ]
+
+
+viewSession : Session -> Html Msg
+viewSession session =
+    div []
+        [ span [] [ text session.account.name ]
+        , button [ onClick Disconnect ] [ text "Logout" ]
+        ]
+
+
+viewError : String -> Html Msg
+viewError error =
     let
-        form =
-            if model.session.token /= "" then
-                authenticated model.session
-            else if model.isRegistering then
-                registerForm model
+        out =
+            if error /= "" then
+                div [ style [ ( "color", "red" ) ] ]
+                    [ p [] [ text error ]
+                    , button [ onClick ClearError ] [ text "OK" ]
+                    ]
             else
-                connectForm model
+                span [] []
     in
-        div [] [ form ]
+        out
 
 
-connectForm : Model -> Html Msg
-connectForm model =
-    div []
-        [ p [ style errorStyle ] [ text model.error ]
-        , input [ placeholder "Name or Email", onInput ChangeIdentifier, style inputStyle ] []
-        , input [ placeholder "Password", onInput ChangePassword, type' "password", style inputStyle ] []
-        , button [ onClick Connect ] [ text "Connect" ]
-        , span [] [ a [ onClick (Registering True), href "#" ] [ text "Sign Up" ] ]
-        ]
-
-
-registerForm : Model -> Html Msg
-registerForm model =
-    div []
-        [ p [ style errorStyle ] [ text model.error ]
-        , input [ placeholder "Name", onInput ChangeName, style inputStyle ] []
-        , input [ placeholder "Email", onInput ChangeEmail, style inputStyle ] []
-        , input [ placeholder "Password", onInput ChangePassword, type' "password", style inputStyle ] []
-        , button [ onClick Register ] [ text "Register" ]
-        , span [] [ a [ onClick (Registering False), href "#" ] [ text "Log In" ] ]
-        ]
-
-
-authenticated : Session -> Html Msg
-authenticated session =
-    div []
-        [ p [] [ text session.account.name ]
-        ]
+onEnter : Msg -> Attribute Msg
+onEnter msg =
+    let
+        tagger code =
+            if code == 13 then
+                msg
+            else
+                NoOp
+    in
+        on "keydown" (Json.Decode.map tagger keyCode)
 
 
 

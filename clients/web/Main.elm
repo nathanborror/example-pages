@@ -60,6 +60,7 @@ init savedModel =
 type Msg
     = AccountsMsg Accounts.Msg
     | PagesMsg Pages.Msg
+    | Reset
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -82,6 +83,9 @@ update msg model =
             in
                 ( { model | pages = updated }, Cmd.map PagesMsg cmd )
 
+        Reset ->
+            ( initModel, Cmd.none )
+
 
 
 -- VIEW
@@ -92,4 +96,5 @@ view model =
     div [ style [ ( "padding", "36px" ), ( "font-family", "-apple-system" ) ] ]
         [ App.map AccountsMsg (Accounts.view model.accounts)
         , App.map PagesMsg (Pages.view model.pages)
+        , button [ onClick Reset ] [ text "reset" ]
         ]

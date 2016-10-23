@@ -5,6 +5,9 @@ import Task exposing (Task)
 import Http
 
 
+-- RPC Task
+
+
 rpc : String -> String -> List ( String, Value ) -> Task Http.RawError Http.Response
 rpc method token json =
     let
@@ -25,6 +28,10 @@ rpc method token json =
             }
     in
         Http.send Http.defaultSettings request
+
+
+
+-- Error Mapper
 
 
 errorMapper : Http.Error -> String
