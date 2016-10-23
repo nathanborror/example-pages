@@ -1,13 +1,74 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/nathanborror/pages/pages"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+var (
+	token      = flag.String("token", "", "Authentication token")
+	name       = flag.String("name", "", "Register name")
+	email      = flag.String("email", "", "Register email")
+	password   = flag.String("password", "", "Your password")
+	identifier = flag.String("identifier", "", "Connect identifier")
+	text       = flag.String("text", "", "Page text")
+	id         = flag.String("id", "", "Page ID")
+)
+
+type client struct {
+	accounts pages.AccountsClient
+	pages    pages.PagesClient
+}
+
+// Accounts
+
+func (c *client) register(ctx context.Context, name, email, password string) (*pages.Session, error) {
+	register := &pages.RegisterRequest{Name: name, Email: email, Password: password}
+	return c.accounts.Register(ctx, register)
+}
+
+func (c *client) connect(ctx context.Context, identifier, password string) (*pages.Session, error) {
+	connect := &pages.ConnectRequest{Identifier: identifier, Password: password}
+	return c.accounts.Connect(ctx, connect)
+}
+
+// Pages
+
+func (c *client) pageCreate(ctx context.Context, text string) (*pages.Page, error) {
+	newPage := &pages.PageCreateRequest{Text: text}
+	return c.pages.PageCreate(ctx, newPage)
+}
+
+func (c *client) pageUpdate(ctx context.Context, id, text string) (*pages.Page, error) {
+	updatePage := &pages.PageUpdateRequest{Id: id, Text: text}
+	return c.pages.PageUpdate(ctx, updatePage)
+}
+
+func (c *client) pageGet(ctx context.Context, id string) (*pages.Page, error) {
+	getPage := &pages.PageGetRequest{Id: id}
+	return c.pages.PageGet(ctx, getPage)
+}
+
+func (c *client) pageList(ctx context.Context) (*pages.PagesSet, error) {
+	return c.pages.PageList(ctx, &pages.Empty{})
+}
+
+func (c *client) pageDelete(ctx context.Context, id string) error {
+	deletePage := &pages.PageDeleteRequest{Id: id}
+	if _, err := c.pages.PageDelete(ctx, deletePage); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Auth
 
 type auth struct {
 	Token string
@@ -23,7 +84,44 @@ func (a *auth) RequireTransportSecurity() bool {
 	return false
 }
 
+// Main
+
 func main() {
+	flag.Parse()
+
+	if len(os.Args) <= 1 {
+		fmt.Println(`Page is a command for writing pages.
+
+Usage:
+
+  page command [arguments]
+
+The commands are:
+
+  register  create an account
+  connect   log in to obtain an auth token
+  list      show all pages
+  get       show a specific page
+  create    save a new page
+  update    change a page
+  delete    remove a page
+`)
+		os.Exit(0)
+	}
+
+	cmds := map[string]bool{
+		"register": true,
+		"connect":  true,
+		"list":     true,
+		"get":      true,
+		"create":   true,
+		"udpate":   true,
+		"delete":   true,
+	}
+	if ok := cmds[os.Args[1]]; !ok {
+		fmt.Printf("page: unknown subcommand '%s'\nRun 'page -help' for usage.\n", os.Args[1])
+		os.Exit(0)
+	}
 
 	ctx := context.Background()
 
@@ -34,82 +132,57 @@ func main() {
 	}
 
 	// Accounts connection
-	accountsConn, err := grpc.Dial("localhost:8080",
+	aConn, err := grpc.Dial("localhost:8080",
 		grpc.WithTransportCredentials(creds),
 	)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-
-	// Accounts client
-	accountsClient := pages.NewAccountsClient(accountsConn)
-
-	// Register
-	register := &pages.RegisterRequest{Name: "Nathan", Email: "nathan@nthn.me", Password: "n"}
-	session, err := accountsClient.Register(ctx, register)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v\n", session)
-
-	// Connect
-	connect := &pages.ConnectRequest{Identifier: "nathan@nthn.me", Password: "n"}
-	session, err = accountsClient.Connect(ctx, connect)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v\n", session)
-
-	// Close account connection
-	accountsConn.Close()
+	defer aConn.Close()
 
 	// Pages connection
-	pagesConn, err := grpc.Dial("localhost:8080",
+	pConn, err := grpc.Dial("localhost:8080",
 		grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(&auth{Token: session.Token}),
+		grpc.WithPerRPCCredentials(&auth{Token: *token}),
 	)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
+	defer pConn.Close()
 
-	// Pages client
-	pagesClient := pages.NewPagesClient(pagesConn)
+	c := client{}
+	c.accounts = pages.NewAccountsClient(aConn)
+	c.pages = pages.NewPagesClient(pConn)
 
-	// Create Page
-	newPage := &pages.PageCreateRequest{Text: "First page!"}
-	page, err := pagesClient.PageCreate(ctx, newPage)
-	if err != nil {
-		log.Fatal(err)
+	// Execute command
+	switch os.Args[1] {
+	case "register":
+		s, err := c.register(ctx, *name, *email, *password)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Token: %s\n", s.Token)
+	case "connect":
+		s, err := c.connect(ctx, *identifier, *password)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Token: %s\n", s.Token)
+	case "list":
+		set, err := c.pageList(ctx)
+		if err != nil {
+			panic(err)
+		}
+		for _, page := range set.Pages {
+			fmt.Println(page.Text)
+		}
+	case "create":
+		page, err := c.pageCreate(ctx, *text)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Created page: %s\n", page.Text)
+	default:
+		os.Exit(0)
 	}
-	log.Printf("%#v\n", page)
-
-	// Update Page
-	updatePage := &pages.PageUpdateRequest{Id: page.Id, Text: "First page!"}
-	page, err = pagesClient.PageUpdate(ctx, updatePage)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v\n", page)
-
-	// Get Page
-	getPage := &pages.PageGetRequest{Id: page.Id}
-	page, err = pagesClient.PageGet(ctx, getPage)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v\n", page)
-
-	// Get Pages
-	list, err := pagesClient.PageList(ctx, &pages.Empty{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v\n", list)
-
-	// Delete Page
-	deletePage := &pages.PageDeleteRequest{Id: page.Id}
-	if _, err = pagesClient.PageDelete(ctx, deletePage); err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v\n", deletePage)
 }
