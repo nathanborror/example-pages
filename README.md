@@ -10,11 +10,18 @@ the new [swift-protobuf][5] library.
 
 - [x] Protobuf Server
 - [x] JSON reverse-proxy
-- [ ] In-memory state
+- [x] In-memory state
 - [ ] Persistent state
 - [x] iOS client
 - [x] Web client
 - [ ] Command-line client
+
+## Requirements
+
+- Go 1.7
+- Swift 3 / Xcode 8
+- openssl
+- At times you may need switch over to MASTER for github.com/apple/swift-protobuf
 
 ## Installation
 
