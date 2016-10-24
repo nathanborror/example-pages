@@ -8,7 +8,7 @@
 import UIKit
 import PageKit
 
-class ListController<Cell: UITableViewCell, Item>: UIViewController, UITableViewDataSource {
+class ListController<Cell: UITableViewCell, Item>: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     let table = Table(style: .plain)
     
@@ -18,6 +18,7 @@ class ListController<Cell: UITableViewCell, Item>: UIViewController, UITableView
     var onUpdate: ((Item) -> Void)?
     var onDelete: ((Item) -> Void)?
     var onRefresh: (() -> [Item])?
+    var onLogout: (() -> Void)?
 
     var configureCell: ((Cell, Item) -> Void)?
     
@@ -25,6 +26,7 @@ class ListController<Cell: UITableViewCell, Item>: UIViewController, UITableView
         super.viewDidLoad()
         
         table
+            .delegate(self)
             .dataSource(self)
             .frame(view.bounds)
             .autoresizingMask([.flexibleWidth, .flexibleHeight])
@@ -36,12 +38,19 @@ class ListController<Cell: UITableViewCell, Item>: UIViewController, UITableView
 
         let create = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(createHit))
         navigationItem.rightBarButtonItem = create
+        
+        let logout = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutHit))
+        navigationItem.leftBarButtonItem = logout
 
         NotificationCenter.default.addObserver(self, selector: #selector(itemsUpdated), name: .onPagesUpdated, object: nil)
     }
 
     func createHit() {
         onCreate?()
+    }
+    
+    func logoutHit() {
+        onLogout?()
     }
     
     func reload() {
@@ -75,4 +84,31 @@ class ListController<Cell: UITableViewCell, Item>: UIViewController, UITableView
     }
 
     // Table Delegate
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let item = items[indexPath.row]
+        var actions = [UITableViewRowAction]()
+        
+        if onDelete != nil {
+            let action = UITableViewRowAction(style: .destructive, title: "Delete") { _, _ in
+                self.onDelete?(item)
+            }
+            actions.append(action)
+        }
+        if onUpdate != nil {
+            let action = UITableViewRowAction(style: .normal, title: "Edit") { _, _ in
+                self.onUpdate?(item)
+            }
+            actions.append(action)
+        }
+        return actions
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }

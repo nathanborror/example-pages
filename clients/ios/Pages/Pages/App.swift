@@ -174,6 +174,8 @@ extension App {
         }
         controller.items = pages.map { $0.value }
         controller.onCreate = { self.viewForm() }
+        controller.onUpdate = { self.viewForm(page: $0) }
+        controller.onDelete = delete
         controller.onRefresh = {
             guard case let .active(_, updatedPages) = self.state else {
                 return pages
@@ -184,6 +186,7 @@ extension App {
                 .map { $0.value }
                 .sorted { $0.created < $1.created }
         }
+        controller.onLogout = logout
         
         navigation = UINavigationController(rootViewController: controller)
         window?.rootViewController = navigation
