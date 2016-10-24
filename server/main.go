@@ -29,10 +29,22 @@ var (
 	ErrAccessDenied = errors.New("Access denied")
 
 	// ErrAccessDeniedMissingToken means the token meta-data value was empty.
-	ErrAccessDeniedMissingToken = errors.New("Access denied: missing token")
+	ErrAccessDeniedMissingToken = errors.New("Access denied: missing authentication token")
 
 	// ErrAccessDeniedInvalidToken means the provided token was invalid.
-	ErrAccessDeniedInvalidToken = errors.New("Access denied: invalid token")
+	ErrAccessDeniedInvalidToken = errors.New("Access denied: invalid authentication token")
+
+	// ErrMissingName means the account name is missing.
+	ErrMissingName = errors.New("Missing name")
+
+	// ErrMissingEmail means the account email address is missing.
+	ErrMissingEmail = errors.New("Missing email address")
+
+	// ErrMissingPassword means the account password is missing.
+	ErrMissingPassword = errors.New("Missing password")
+
+	// ErrMissingText means the page text is missing.
+	ErrMissingText = errors.New("Missing text")
 )
 
 type server struct {
@@ -42,6 +54,15 @@ type server struct {
 // Accounts Server
 
 func (s *server) Register(ctx context.Context, in *pages.RegisterRequest) (*pages.Session, error) {
+	if in.Name == "" {
+		return nil, ErrMissingName
+	}
+	if in.Email == "" {
+		return nil, ErrMissingEmail
+	}
+	if in.Password == "" {
+		return nil, ErrMissingPassword
+	}
 	account, err := s.state.AccountCreate(in.Name, in.Email, in.Password)
 	if err != nil {
 		return nil, err
@@ -55,6 +76,12 @@ func (s *server) Register(ctx context.Context, in *pages.RegisterRequest) (*page
 }
 
 func (s *server) Connect(ctx context.Context, in *pages.ConnectRequest) (*pages.Session, error) {
+	if in.Identifier == "" {
+		return nil, ErrMissingEmail
+	}
+	if in.Password == "" {
+		return nil, ErrMissingPassword
+	}
 	account, err := s.state.AccountForEmail(in.Identifier)
 	if err != nil {
 		return nil, err
@@ -73,11 +100,17 @@ func (s *server) Connect(ctx context.Context, in *pages.ConnectRequest) (*pages.
 // Pages Server
 
 func (s *server) PageCreate(ctx context.Context, in *pages.PageCreateRequest) (*pages.Page, error) {
+	if in.Text == "" {
+		return nil, ErrMissingText
+	}
 	accountID := s.authorizedAccountID(ctx)
 	return s.state.PageCreate(accountID, in.Text)
 }
 
 func (s *server) PageUpdate(ctx context.Context, in *pages.PageUpdateRequest) (*pages.Page, error) {
+	if in.Text == "" {
+		return nil, ErrMissingText
+	}
 	accountID := s.authorizedAccountID(ctx)
 	return s.state.PageUpdate(in.Id, accountID, in.Text)
 }

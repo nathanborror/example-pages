@@ -62,11 +62,11 @@ func (s *sqlite) Account(id string) (*pages.Account, error) {
 	var rec pages.Account
 	stmt, err := s.db.Prepare("SELECT id,name,email,created,modified FROM account WHERE id = ?")
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving account for id '%s': %s", id, err)
+		return nil, err
 	}
 	row := stmt.QueryRow(id)
 	if err := scanAccount(row, &rec); err != nil {
-		return nil, fmt.Errorf("Error retrieving account for id '%s': %s", id, err)
+		return nil, state.ErrAccountNotFound
 	}
 	return &rec, nil
 }
@@ -76,11 +76,11 @@ func (s *sqlite) AccountForEmail(email string) (*pages.Account, error) {
 	var rec pages.Account
 	stmt, err := s.db.Prepare("SELECT id,name,email,created,modified FROM account WHERE email = ?")
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving account for email '%s': %s", email, err)
+		return nil, err
 	}
 	row := stmt.QueryRow(email)
 	if err := scanAccount(row, &rec); err != nil {
-		return nil, fmt.Errorf("Error retrieving account for email '%s': %s", email, err)
+		return nil, state.ErrAccountNotFound
 	}
 	return &rec, nil
 }
@@ -90,11 +90,11 @@ func (s *sqlite) AccountForToken(token string) (*pages.Account, error) {
 	var rec pages.Account
 	stmt, err := s.db.Prepare("SELECT id,name,email,created,modified FROM account WHERE token = ?")
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving account for token '%s': %s", token, err)
+		return nil, err
 	}
 	row := stmt.QueryRow(token)
 	if err := scanAccount(row, &rec); err != nil {
-		return nil, fmt.Errorf("Error retrieving account for token '%s': %s", token, err)
+		return nil, state.ErrAccountNotFound
 	}
 	return &rec, nil
 }
@@ -103,15 +103,15 @@ func (s *sqlite) AccountForPassword(id, passwordAttempt string) (*pages.Account,
 	var password string
 	stmt, err := s.db.Prepare("SELECT password FROM account WHERE id = ?")
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving account for password: %s", err)
+		return nil, err
 	}
 	if err = stmt.QueryRow(id).Scan(&password); err == sql.ErrNoRows {
-		return nil, fmt.Errorf("Not found")
+		return nil, state.ErrAccountNotFound
 	} else if err != nil {
 		return nil, err
 	}
 	if !utils.IsPasswordValid(password, passwordAttempt) {
-		return nil, fmt.Errorf("Error password invalid")
+		return nil, state.ErrPasswordInvalid
 	}
 	return s.Account(id)
 }
@@ -201,14 +201,14 @@ func (s *sqlite) Page(id string) (*pages.Page, error) {
 	}
 	row := stmt.QueryRow(id)
 	if err = scanPage(row, &rec, &account); err != nil {
-		return nil, fmt.Errorf("Error retrieving page for id '%s': %s", id, err)
+		return nil, state.ErrPageNotFound
 	}
 	if account.Id == "" {
-		return nil, fmt.Errorf("Error retrieving account ID")
+		return nil, fmt.Errorf("Could not retrieve account ID")
 	}
 	rec.Account, err = s.Account(account.Id)
 	if err != nil {
-		return nil, fmt.Errorf("Error retrieving page for id '%s': %s", id, err)
+		return nil, fmt.Errorf("Could not retrieve page for ID '%s' (%s)", id, err)
 	}
 	return &rec, nil
 }

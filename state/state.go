@@ -11,6 +11,9 @@ var (
 	// ErrAccountNotFound means the account wasn't found for the given identifier.
 	ErrAccountNotFound = errors.New("Account not found")
 
+	// ErrPasswordInvalid means the password used to attempt to connect was invalid.
+	ErrPasswordInvalid = errors.New("Account password invalid")
+
 	// ErrPageNotFound means the page wasn't found for the given identifier.
 	ErrPageNotFound = errors.New("Page not found")
 
