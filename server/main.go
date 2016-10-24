@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -18,6 +17,7 @@ import (
 	"github.com/nathanborror/pages/utils"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 )
@@ -26,25 +26,25 @@ const ctxAccountAuthorizationID = "AccountAuthorizationID"
 
 var (
 	// ErrAccessDenied means the request was missing token meta-data.
-	ErrAccessDenied = errors.New("Access denied")
+	ErrAccessDenied = grpc.Errorf(codes.PermissionDenied, "Access denied")
 
 	// ErrAccessDeniedMissingToken means the token meta-data value was empty.
-	ErrAccessDeniedMissingToken = errors.New("Access denied: missing authentication token")
+	ErrAccessDeniedMissingToken = grpc.Errorf(codes.Unauthenticated, "Missing authentication token")
 
 	// ErrAccessDeniedInvalidToken means the provided token was invalid.
-	ErrAccessDeniedInvalidToken = errors.New("Access denied: invalid authentication token")
+	ErrAccessDeniedInvalidToken = grpc.Errorf(codes.Unauthenticated, "Invalid authentication token")
 
 	// ErrMissingName means the account name is missing.
-	ErrMissingName = errors.New("Missing name")
+	ErrMissingName = grpc.Errorf(codes.InvalidArgument, "Missing name")
 
 	// ErrMissingEmail means the account email address is missing.
-	ErrMissingEmail = errors.New("Missing email address")
+	ErrMissingEmail = grpc.Errorf(codes.InvalidArgument, "Missing email address")
 
 	// ErrMissingPassword means the account password is missing.
-	ErrMissingPassword = errors.New("Missing password")
+	ErrMissingPassword = grpc.Errorf(codes.InvalidArgument, "Missing password")
 
 	// ErrMissingText means the page text is missing.
-	ErrMissingText = errors.New("Missing text")
+	ErrMissingText = grpc.Errorf(codes.InvalidArgument, "Missing text")
 )
 
 type server struct {
