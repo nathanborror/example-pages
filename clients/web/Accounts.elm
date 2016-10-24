@@ -9,7 +9,7 @@ import Json.Decode exposing (Decoder, string, list)
 import Json.Decode.Pipeline exposing (decode, required)
 import Http
 import Task
-import Utils exposing (..)
+import Rpc
 
 
 -- MODEL
@@ -63,10 +63,10 @@ type Msg
     = NoOp
     | Connect
     | ConnectSucceed Session
-    | ConnectFail Http.Error
+    | ConnectFail Rpc.Error
     | Register
     | RegisterSucceed Session
-    | RegisterFail Http.Error
+    | RegisterFail Rpc.Error
     | Registering Bool
     | Disconnect
     | ChangeName String
@@ -88,7 +88,7 @@ update msg model =
             ( { model | session = session }, Cmd.none )
 
         ConnectFail err ->
-            ( { model | error = (errorMapper err) }, Cmd.none )
+            ( { model | error = (Rpc.errorToString err) }, Cmd.none )
 
         Register ->
             ( model, register model )
@@ -97,7 +97,7 @@ update msg model =
             ( { model | session = session }, Cmd.none )
 
         RegisterFail err ->
-            ( { model | error = (errorMapper err) }, Cmd.none )
+            ( { model | error = (Rpc.errorToString err) }, Cmd.none )
 
         Registering bool ->
             ( { model | isRegistering = bool, error = "" }, Cmd.none )
@@ -127,8 +127,8 @@ connect model =
             ]
 
         task =
-            rpc "account.connect" "" json
-                |> Http.fromJson decodeSession
+            Rpc.send "account.connect" "" json
+                |> Rpc.fromJson decodeSession
     in
         task
             |> Task.perform ConnectFail ConnectSucceed
@@ -144,8 +144,8 @@ register model =
             ]
 
         task =
-            rpc "account.register" "" json
-                |> Http.fromJson decodeSession
+            Rpc.send "account.register" "" json
+                |> Rpc.fromJson decodeSession
     in
         task
             |> Task.perform RegisterFail RegisterSucceed

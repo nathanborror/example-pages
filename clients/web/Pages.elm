@@ -12,7 +12,7 @@ import Json.Decode.Pipeline exposing (decode, required, optional)
 import Http
 import Task
 import Accounts
-import Utils exposing (rpc, errorMapper)
+import Rpc
 
 
 -- MODEL
@@ -62,10 +62,10 @@ type Msg
     | ListFail Http.Error
     | Create
     | CreateSucceed Page
-    | CreateFail Http.Error
+    | CreateFail Rpc.Error
     | Delete String
     | DeleteSucceed Page
-    | DeleteFail Http.Error
+    | DeleteFail Rpc.Error
     | ChangeText String
     | ClearError
 
@@ -79,8 +79,8 @@ update msg model =
         ListSucceed set ->
             ( { model | pages = set.pages }, Cmd.none )
 
-        ListFail err ->
-            ( { model | error = (errorMapper err) }, Cmd.none )
+        ListFail _ ->
+            ( model, Cmd.none )
 
         Create ->
             ( model, createPage model )
@@ -89,7 +89,7 @@ update msg model =
             ( { model | text = "", pages = List.append model.pages [ page ] }, Cmd.none )
 
         CreateFail err ->
-            ( { model | error = (errorMapper err) }, Cmd.none )
+            ( { model | error = (Rpc.errorToString err) }, Cmd.none )
 
         Delete id ->
             ( model, deletePage id model )
@@ -98,7 +98,7 @@ update msg model =
             ( { model | pages = List.filter (\n -> n.id /= page.id) model.pages }, Cmd.none )
 
         DeleteFail err ->
-            ( { model | error = (errorMapper err) }, Cmd.none )
+            ( { model | error = (Rpc.errorToString err) }, Cmd.none )
 
         ChangeText text ->
             ( { model | text = text }, Cmd.none )
@@ -123,8 +123,8 @@ createPage model =
             [ ( "text", Json.Encode.string model.text ) ]
 
         task =
-            rpc "page.create" model.session.token json
-                |> Http.fromJson decodePage
+            Rpc.send "page.create" model.session.token json
+                |> Rpc.fromJson decodePage
     in
         Task.perform CreateFail CreateSucceed task
 
@@ -136,8 +136,8 @@ deletePage id model =
             [ ( "id", Json.Encode.string id ) ]
 
         task =
-            rpc "page.delete" model.session.token json
-                |> Http.fromJson decodePage
+            Rpc.send "page.delete" model.session.token json
+                |> Rpc.fromJson decodePage
     in
         Task.perform DeleteFail DeleteSucceed task
 
