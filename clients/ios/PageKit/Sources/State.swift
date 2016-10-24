@@ -40,7 +40,10 @@ public enum State: StateType {
     }
     
     public static var initial: State {
-        return .inactive
+        guard let session = State.restore() else {
+            return .inactive
+        }
+        return .active(session: session, pages: [:])
     }
     
     public mutating func handle(event: Event) -> Command? {
@@ -48,10 +51,12 @@ public enum State: StateType {
             
         case (.inactive, .activate(let session)):
             self = .active(session: session, pages: [:])
+            State.save(session: session)
             return .activated
             
         case (.active, .deactivate):
             self = .inactive
+            State.destroy()
             return .deactivated
             
         case (let .active(session, pages), let .update(newPages)):
@@ -74,5 +79,23 @@ public enum State: StateType {
         default: break
         }
         return nil
+    }
+    
+    static let sessionKey = "session"
+    
+    static func save(session: Session) {
+        let data = try? session.serializeProtobuf()
+        UserDefaults.standard.setValue(data, forKey: sessionKey)
+    }
+    
+    static func restore() -> Session? {
+        guard let data = UserDefaults.standard.value(forKey: sessionKey) as? Data else {
+            return nil
+        }
+        return try? Session(protobuf: data)
+    }
+    
+    static func destroy() {
+        UserDefaults.standard.removeObject(forKey: sessionKey)
     }
 }
