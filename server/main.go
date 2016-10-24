@@ -41,24 +41,19 @@ type server struct {
 // Accounts Server
 
 func (s *server) Register(ctx context.Context, in *pages.RegisterRequest) (*pages.Session, error) {
-	password := utils.PasswordMake(in.Password)
-	token := utils.RandSha1()
-
-	account, err := s.state.AccountCreate(in.Name, in.Email, password)
+	account, err := s.state.AccountCreate(in.Name, in.Email, in.Password)
 	if err != nil {
 		return nil, err
 	}
-	if err := s.state.AccountTokenSet(account.Id, token); err != nil {
+	token, err := s.state.AccountTokenSet(account.Id)
+	if err != nil {
 		return nil, err
 	}
-
 	session := &pages.Session{Account: account, Token: token}
 	return session, nil
 }
 
 func (s *server) Connect(ctx context.Context, in *pages.ConnectRequest) (*pages.Session, error) {
-	token := utils.RandSha1()
-
 	account, err := s.state.AccountForEmail(in.Identifier)
 	if err != nil {
 		return nil, err
@@ -66,10 +61,10 @@ func (s *server) Connect(ctx context.Context, in *pages.ConnectRequest) (*pages.
 	if _, err = s.state.AccountForPassword(account.Id, in.Password); err != nil {
 		return nil, err
 	}
-	if err := s.state.AccountTokenSet(account.Id, token); err != nil {
+	token, err := s.state.AccountTokenSet(account.Id)
+	if err != nil {
 		return nil, err
 	}
-
 	session := &pages.Session{Account: account, Token: token}
 	return session, nil
 }

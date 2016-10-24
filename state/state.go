@@ -26,7 +26,7 @@ type State interface {
 	AccountForEmail(email string) (*pages.Account, error)
 	AccountForToken(token string) (*pages.Account, error)
 	AccountForPassword(id, password string) (*pages.Account, error)
-	AccountTokenSet(id, token string) error
+	AccountTokenSet(id string) (string, error)
 	AccountCreate(name, email, password string) (*pages.Account, error)
 
 	// Pages

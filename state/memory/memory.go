@@ -77,18 +77,19 @@ func (s *memory) AccountCreate(name, email, password string) (*pages.Account, er
 		Id:       uniqueID(),
 	}
 	s.accounts[rec.Id] = &rec
-	s.passwords[rec.Id] = password
+	s.passwords[rec.Id] = utils.PasswordMake(password)
 	return &rec, nil
 }
 
 // AccountTokenSet sets an account's access token.
-func (s *memory) AccountTokenSet(id, token string) error {
+func (s *memory) AccountTokenSet(id string) (string, error) {
+	token := utils.RandSha1()
 	rec, ok := s.accounts[id]
 	if !ok {
-		return state.ErrAccountNotFound
+		return "", state.ErrAccountNotFound
 	}
 	s.tokens[token] = rec.Id
-	return nil
+	return token, nil
 }
 
 // Pages returns all pages.
