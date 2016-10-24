@@ -132,12 +132,13 @@ func (s *sqlite) AccountCreate(name, email, password string) (*pages.Account, er
 
 // AccountTokenSet sets an account's access token.
 func (s *sqlite) AccountTokenSet(id string) (string, error) {
+	ts := now()
 	token := utils.RandSha1()
-	stmt, err := s.db.Prepare("UPDATE account SET token = ? WHERE id = ?")
+	stmt, err := s.db.Prepare("UPDATE account SET token = ?, modified = ? WHERE id = ?")
 	if err != nil {
 		return "", err
 	}
-	if _, err := stmt.Exec(token, id); err != nil {
+	if _, err := stmt.Exec(token, ts, id); err != nil {
 		return "", err
 	}
 	return token, nil
@@ -229,11 +230,12 @@ func (s *sqlite) PageCreate(accountID, text string) (*pages.Page, error) {
 
 // PageUpdate updates and returns the updated page.
 func (s *sqlite) PageUpdate(id, account, text string) (*pages.Page, error) {
-	stmt, err := s.db.Prepare("UPDATE page SET account = ? SET text = ? WHERE id = ?")
+	ts := now()
+	stmt, err := s.db.Prepare("UPDATE page SET account = ?, text = ?, modified = ? WHERE id = ?")
 	if err != nil {
 		return nil, err
 	}
-	if _, err := stmt.Exec(account, text, id); err != nil {
+	if _, err := stmt.Exec(account, text, ts, id); err != nil {
 		return nil, err
 	}
 	return s.Page(id)
