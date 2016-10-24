@@ -11,7 +11,7 @@ the new [swift-protobuf][5] library.
 - [x] Protobuf Server
 - [x] JSON reverse-proxy
 - [x] In-memory state
-- [ ] Persistent state
+- [x] Persistent state
 - [x] iOS client
 - [x] Web client
 - [ ] Command-line client
@@ -31,6 +31,10 @@ the new [swift-protobuf][5] library.
 ### Run server & reverse-proxy
 
     $ cd server && go run main.go
+
+Run with persistent sqlite backend:
+
+    $ cd server && SERVER_STATE=sqlite go run main.go
 
 ### Run iOS client
 

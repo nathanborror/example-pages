@@ -14,6 +14,7 @@ import (
 	"github.com/nathanborror/pages/server/proxy"
 	"github.com/nathanborror/pages/state"
 	"github.com/nathanborror/pages/state/memory"
+	"github.com/nathanborror/pages/state/sqlite"
 	"github.com/nathanborror/pages/utils"
 
 	"google.golang.org/grpc"
@@ -183,6 +184,7 @@ func main() {
 
 	// Initialize State
 	state.Register("memory", memory.New)
+	state.Register("sqlite", sqlite.New)
 	s.state = state.New(stateBackend)
 
 	// Credentials
