@@ -37,11 +37,14 @@ rpc method token json =
 errorMapper : Http.Error -> String
 errorMapper err =
     case err of
+        Http.Timeout ->
+            "Timeout"
+
+        Http.NetworkError ->
+            "Network Error"
+
         Http.UnexpectedPayload exp ->
-            exp
+            "UnexpectedPayload: " ++ exp
 
         Http.BadResponse code exp ->
-            exp
-
-        otherwise ->
-            ""
+            "Bad Response: " ++ exp
