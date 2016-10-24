@@ -106,9 +106,15 @@ public class Service {
 
     private func call<Request: ProtobufMessage, Response: ProtobufMessage>(route: Service.Route, data: Request, token: String?, then: @escaping (() throws -> Response) -> Void) {
         do {
-            try session.write(path: String(describing: route), message: data, token: token) { bytes in
-                let data = Data(bytes)
-                then { return try Response(protobuf: data) }
+            try session.write(path: String(describing: route), message: data, token: token) {
+                switch $0 {
+                case .value(let bytes):
+                    let data = Data(bytes)
+                    then { return try Response(protobuf: data) }
+                case .failure(let err):
+                    let error = ServiceError(err: err)
+                    then { throw error }
+                }
             }
         } catch {
             then { throw error }

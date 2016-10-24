@@ -51,7 +51,7 @@ extension App {
 
         case let .error(error)?:
             DispatchQueue.main.async {
-                self.viewError(error: error)
+                self.viewError(err: error)
             }
             
         case nil: break
@@ -203,8 +203,14 @@ extension App {
         navigation?.present(controllerNav, animated: true, completion: nil)
     }
     
-    func viewError(error: Error?) {
-        print(error)
+    func viewError(err: Error?) {
+        guard let error = err as? ServiceError else {
+            print(err)
+            return
+        }
+        let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        navigation?.present(alert, animated: true, completion: nil)
     }
 }
 
