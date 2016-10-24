@@ -15,8 +15,8 @@ type memory struct {
 	pages     map[string]*pages.Page
 }
 
-// New returns a memory state based on the provided config.
-func New(config map[string]string) state.State {
+// New returns a memory backed state interface.
+func New() state.State {
 	return &memory{
 		make(map[string]*pages.Account),
 		make(map[string]string),

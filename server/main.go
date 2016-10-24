@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -23,13 +22,6 @@ import (
 )
 
 const ctxAccountAuthorizationID = "AccountAuthorizationID"
-
-var (
-	host        = flag.String("host", "localhost", "Listening hostname")
-	port        = flag.String("port", "8080", "Listening port")
-	gatewayPort = flag.String("gateway-port", "8081", "Listening RESTful reverse-proxy port")
-	debugPort   = flag.String("debug-port", "8082", "Listening trace debugger port")
-)
 
 var (
 	// ErrAccessDenied means the request was missing token meta-data.
@@ -184,13 +176,19 @@ func (s *server) authorizedAccount(ctx context.Context) (account *pages.Account)
 // Main
 
 func main() {
-	flag.Parse()
+
+	// Environment variables
+	host := utils.GetenvString("SERVER_HOST", "localhost")
+	port := utils.GetenvInt("SERVER_PORT", 8080)
+	proxyPort := utils.GetenvInt("SERVER_PROXY_PORT", 8081)
+	debug := utils.GetenvBool("DEBUG", true) // Runs on server host port 8082
+	stateBackend := utils.GetenvString("SERVER_STATE", "memory")
 
 	s := server{}
 
 	// Initialize State
 	state.Register("memory", memory.New)
-	s.state = state.New("memory", nil)
+	s.state = state.New(stateBackend)
 
 	// Credentials
 	creds, err := credentials.NewServerTLSFromFile("dev.crt", "dev.key")
@@ -208,7 +206,7 @@ func main() {
 	pages.RegisterPagesServer(gs, &s)
 
 	// Listen over TCP
-	lis, err := net.Listen("tcp", ":"+*port)
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		panic(err)
 	}
@@ -217,11 +215,13 @@ func main() {
 	go gs.Serve(lis)
 
 	// Serve debugger
-	trace.DebugUseAfterFinish = true
-	go http.ListenAndServe(":"+*debugPort, nil)
+	if debug {
+		trace.DebugUseAfterFinish = true
+		go http.ListenAndServe(":8082", nil)
+	}
 
 	// Serve gRPC gateway
-	if err := proxy.Serve(fmt.Sprintf("%s:%s", *host, *port), *gatewayPort); err != nil {
+	if err := proxy.Serve(fmt.Sprintf("%s:%d", host, port), proxyPort); err != nil {
 		panic(err)
 	}
 }

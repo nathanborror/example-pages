@@ -34,7 +34,7 @@ func preflightHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Serve starts the gateway
-func Serve(endpoint, port string) error {
+func Serve(endpoint string, port int) error {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -55,5 +55,5 @@ func Serve(endpoint, port string) error {
 		return err
 	}
 
-	return http.ListenAndServe(fmt.Sprintf(":%s", port), allowCORS(mux))
+	return http.ListenAndServe(fmt.Sprintf(":%d", port), allowCORS(mux))
 }

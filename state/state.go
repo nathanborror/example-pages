@@ -40,21 +40,21 @@ type State interface {
 }
 
 // Backend represents a state backend that can be instantiated.
-type Backend func(map[string]string) State
+type Backend func() State
 
 // Register adds a potential backed to the registry.
 func Register(kind string, backend Backend) {
 	registered[kind] = backend
 }
 
-// New instantiates a state backend with the given config.
-func New(kind string, config map[string]string) State {
+// New instantiates a state backend.
+func New(kind string) State {
 	maker, ok := registered[kind]
 	if !ok {
 		fmt.Printf("state: state backend '%s' was not registered\n", kind)
 		return nil
 	}
-	return maker(config)
+	return maker()
 }
 
 var registered = make(map[string]Backend)
